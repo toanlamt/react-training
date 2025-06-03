@@ -9,9 +9,9 @@ const userRoutes: RouteObject[] = [
         element: <UserPage/>,
         children: [
             { path: '', element: <Navigate to="list" replace/> },
-            { path: ':id/kyc', element: <UserKYCPage/> },
-            { path: ':id/edit', element: <UserProfilePage/> },
-            { path: ':id/details', element: <UserProfilePage/> }
+            { path: ':userId/kyc', element: <UserKYCPage/> },
+            { path: ':userId/edit', element: <UserProfilePage/> },
+            { path: ':userId/details', element: <UserProfilePage/> }
         ]
     }
 ]
