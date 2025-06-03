@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import * as yup from 'yup';
@@ -14,7 +15,7 @@ const loginSchema = yup.object({
 
 const Login = () => {
     const navigate = useNavigate()
-    const { login, isLoading, error, clearError } = useAuthStore();
+    const { login, isLoading, error, clearError, user } = useAuthStore();
     const {
         register,
         handleSubmit,
@@ -26,11 +27,16 @@ const Login = () => {
         try {
             clearError();
             await login(data);
-            navigate('/', { replace: true });
         } catch (error) {
             console.error('Login failed:', error);
         }
     };
+
+    useEffect(() => {
+        if (user) {
+            navigate(`/pages/users/${user.id}/details`, { replace: true });
+        }
+    }, [user, navigate]);
 
     return (
         <div className="flex flex-col items-center justify-center px-6 pt-8 mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">
@@ -70,7 +76,7 @@ const Login = () => {
                         <div className="ml-3 text-sm">
                             <label htmlFor="remember" className="font-medium text-gray-900 dark:text-white">Remember me</label>
                         </div>
-                        <Link to='/pages/auth/reset-password' className="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">Lost Password?</Link>
+                        <Link to='/auth/reset-password' className="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">Lost Password?</Link>
                     </div>
                     <button type="submit" disabled={isLoading} className="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login to your account</button>
                     <div className="text-sm font-medium text-gray-500 dark:text-gray-400">

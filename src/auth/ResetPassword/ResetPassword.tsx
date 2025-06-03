@@ -1,4 +1,20 @@
+import { useState } from 'react';
+import { Modal, Button, ModalBody, ModalHeader, ModalFooter } from 'flowbite-react';
+
+
 const ResetPassword = () => {
+
+    const [showPopup, setShowPopup] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault(); 
+        setShowPopup(true);
+    };
+
+    const closePopup = () => {
+        setShowPopup(false);
+    }
+
     return (
         <div className="flex flex-col items-center justify-center px-6 pt-8 mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">
             <a href="" className="flex items-center justify-center mb-8 text-2xl font-semibold lg:mb-10 dark:text-white">
@@ -9,7 +25,7 @@ const ResetPassword = () => {
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     Reset your password
                 </h2>
-                <form className="mt-8 space-y-6" action="#">
+                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
                         <input type="email" name="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="name@company.com" required/>
@@ -33,6 +49,24 @@ const ResetPassword = () => {
                     <button type="submit" className="w-full px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Reset password</button>
                 </form>
             </div>
+            {/* Popup Modal */}
+            <Modal show={showPopup} onClose={closePopup}>
+                <ModalHeader>
+                    Oops! 😅
+                </ModalHeader>
+                <ModalBody>
+                    <div className="text-center">
+                        <p className="text-gray-700">
+                            Điền cho vui hoy, chưa làm tính năng này. Vui lòng tạo account mới, hihi!!!
+                        </p>
+                    </div>
+                </ModalBody>
+                <ModalFooter>
+                    <Button onClick={closePopup}>
+                        Close
+                    </Button>
+                </ModalFooter>
+            </Modal>
         </div>
     )
 }
