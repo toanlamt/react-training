@@ -3,13 +3,19 @@ export type WorkType = 'email' | 'phone';
 export type AddressType = 'mailing' | 'work';
 export type DocType = 'passport' | 'id_card' | 'driver_license';
 
+export interface BasicInfo {
+    first_name: string;
+    middle_name?: string;
+    last_name: string;
+    dob: string;
+    age: number;
+}
+
 export interface Contact {
     type: WorkType;
     value: string;
     subtype: SubWorkType;
     preferred: boolean;
-    id: string;
-    profile_id: string;
 }
 
 export interface Address {
@@ -18,34 +24,24 @@ export interface Address {
     street: string;
     postal_code?: string;
     type: AddressType;
-    id: string;
-    profile_id: string;
 }
 
 export interface Document {
     doc_type: DocType;
     expiry_date: string;
     file_path: string;
-    id: string;
-    profile_id: string;
 }
 
 export interface Employment {
     company_name: string;
     from_date: string;
     to_date?: string;
-    id: string;
-    profile_id: string;
 }
 
 export interface UserProfile {
     id: string;
-    first_name: string;
-    middle_name?: string;
-    last_name: string;
-    dob: string;
-    age: number;
     user_id: string;
+    basicinfo: BasicInfo;
     contacts: Contact[];
     addresses: Address[];
     documents: Document[];
