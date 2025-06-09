@@ -66,6 +66,8 @@ const ProfileForm = () => {
         }
     };
 
+    console.log(tempProfile);
+
 
     useEffect(() => {
         // Fetch user profile using userId.
@@ -137,7 +139,7 @@ const ProfileForm = () => {
                     </Alert>
                 )}
 
-                {/* Render profile cards if profile exists */}
+                {/* Render profile cards useFormif profile exists */}
                 {!isLoading && !error && tempProfile && (
                     <>
                         <BasicInfoCard data={tempProfile.basicinfo} onChange={(basicinfo) => handlePartialUpdate({ basicinfo })} />
