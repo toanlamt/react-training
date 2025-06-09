@@ -18,38 +18,36 @@ type Props = {
     onChange: (data: BasicInfo) => void;
 };
 
-
-const basicInfoSchema = yup.object({
-    first_name: yup.string().required("First name is required"),
-    middle_name: yup.string().optional(),
-    last_name: yup.string().required("Last name is required"),
-    dob: yup
-        .string()
-        .required("Date of birth is required")
-        .test("is-date", "Invalid date", (value) => !isNaN(Date.parse(value)))
-        .test("age-min", "You must be at least 18 years old", (value) => {
-            if (!value) return false;
-            const age = calculateAge(value);
-            return age >= 18;
-        }),
-    age: yup
-        .number()
-});
+const basicInfoSchema: yup.ObjectSchema<BasicInfo> = yup
+    .object({
+        first_name: yup.string().required("First name is required"),
+        middle_name: yup.string().optional(),
+        last_name: yup.string().required("Last name is required"),
+        dob: yup
+            .string()
+            .required("Date of birth is required")
+            .test("is-date", "Invalid date", (v) => !isNaN(Date.parse(v || "")))
+            .test("min-age", "You must be at least 18", (v) => calculateAge(v || "") >= 18),
+        age: yup.number().required(),
+    })
+    .required()
+    .strict(true);
 
 export const BasicInfoCard: React.FC<Props> = ({ data, onChange }) => {
     const [editMode, setEditMode] = useState(false);
 
     const {
         register,
-        handleSubmit,
-        formState: { errors },
-        reset,
         control,
+        handleSubmit,
+        reset,
         watch,
+        formState: { errors },
     } = useForm<BasicInfo>({
         defaultValues: {
             ...data,
-            middle_name: data.middle_name || "",
+            middle_name: data.middle_name ?? "",
+            age: calculateAge(data.dob),
         },
         resolver: yupResolver(basicInfoSchema),
     });
@@ -58,8 +56,8 @@ export const BasicInfoCard: React.FC<Props> = ({ data, onChange }) => {
     const onSubmit = (values: BasicInfo) => {
         const updatedValues = {
             ...values,
-            age: calculateAge(values.dob), // Dynamically calculate age based on dob
-        };
+            age: calculateAge(values.dob),
+        }
         onChange(updatedValues);
         setEditMode(false);
     };
@@ -126,9 +124,6 @@ export const BasicInfoCard: React.FC<Props> = ({ data, onChange }) => {
                 <div>
                     <Label htmlFor="age">Age</Label>
                     <TextInput disabled value={calculateAge(dobValue).toString()} />
-                    {errors.age && (
-                        <p className="text-red-500 text-sm">{errors.age.message}</p>
-                    )}
                 </div>
             </div>
         </Card>

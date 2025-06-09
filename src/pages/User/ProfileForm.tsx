@@ -66,9 +66,6 @@ const ProfileForm = () => {
         }
     };
 
-    console.log(tempProfile);
-
-
     useEffect(() => {
         // Fetch user profile using userId.
         if (userId) {
@@ -143,7 +140,7 @@ const ProfileForm = () => {
                 {!isLoading && !error && tempProfile && (
                     <>
                         <BasicInfoCard data={tempProfile.basicinfo} onChange={(basicinfo) => handlePartialUpdate({ basicinfo })} />
-                        <AddressCard data={tempProfile.addresses} onChange={(addresses) => handlePartialUpdate({ addresses })} />
+                        <AddressCard data={tempProfile.addresses} onChange={(addresses) => handlePartialUpdate({ addresses })} readOnly={false}/>
                         <EmailCard data={emails} onChange={(updatedEmails) => handlePartialUpdate({ contacts: [...updatedEmails, ...phones] })} />
                         <PhoneCard data={phones} onChange={(updatedPhones) => handlePartialUpdate({ contacts: [...emails, ...updatedPhones] })} />
                         <DocumentCard data={tempProfile.documents} onChange={(docs) => handlePartialUpdate({ documents: docs })} />

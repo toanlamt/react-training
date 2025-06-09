@@ -22,7 +22,7 @@ export interface Address {
     country: string;
     city: string;
     street: string;
-    postal_code?: string;
+    postal_code: string;
     type: AddressType;
 }
 
@@ -35,7 +35,7 @@ export interface Document {
 export interface Employment {
     company_name: string;
     from_date: string;
-    to_date?: string;
+    to_date: string;
 }
 
 export interface UserProfile {
