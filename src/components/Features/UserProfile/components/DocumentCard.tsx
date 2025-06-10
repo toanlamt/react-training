@@ -4,15 +4,35 @@ import {
     FileInput,
     Button,
     Datepicker,
-    Select
+    TextInput,
+    Select,
+    HR
 } from "flowbite-react";
 import { useState, useEffect } from "react";
-import type { Document } from '../../../../shared/types/userProfile';
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import type { Document, DocType } from '../../../../shared/types/userProfile';
+import { toLocalDateString, fromDateString } from "../../../../utils/date";
 
 type Props = {
     data: Document[];
     onChange: (docs: Document[]) => void;
+    readOnly?: boolean;
 };
+
+const documentSchema = yup.object({
+    doc_type: yup.mixed<DocType>().oneOf(["passport", "id_card", "driver_license"]).required(),
+    file_path: yup.string().required("File is required"),
+    expiry_date: yup
+        .string()
+        .required("Expiry date is required")
+        .test("is-date", "Invalid date", (v) => !isNaN(Date.parse(v || ""))),
+});
+
+const documentListSchema = yup.object({
+    documents: yup.array().of(documentSchema).min(1, "At least one document is required").defined()
+});
 
 const DOC_TYPE_OPTIONS: Document["doc_type"][] = [
     "passport",
@@ -20,79 +40,62 @@ const DOC_TYPE_OPTIONS: Document["doc_type"][] = [
     "driver_license",
 ];
 
-export const DocumentCard: React.FC<Props> = ({ data, onChange }) => {
-    const [documents, setDocuments] = useState<Document[]>([]);
+export const DocumentCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
     const [editMode, setEditMode] = useState(false);
 
+    const {
+        control,
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+        setValue,
+        watch,
+    } = useForm<{ documents: Document[] }>({
+        defaultValues: { documents: data },
+        resolver: yupResolver(documentListSchema),
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "documents",
+    });
+
+    const documents = watch("documents");
+
     useEffect(() => {
-        setDocuments(data);
-    }, [data]);
+        reset({ documents: data });
+    }, [data, reset]);
 
-    const handleFieldChange = (
-        index: number,
-        field: keyof Document,
-        value: string
-    ) => {
-        const updated = [...documents];
-        if (field === "doc_type" && DOC_TYPE_OPTIONS.includes(value as Document["doc_type"])) {
-            updated[index][field] = value as Document["doc_type"];
-        } else {
-            updated[index] = { ...updated[index], [field]: value };
+    const onSubmit = (values: { documents: Document[] }) => {
+        const filtered = values.documents.filter((d) => d.doc_type && d.file_path);
+        onChange(filtered);
+        setEditMode(false);
+    };
+
+    const handleFileChange = (file: File | null, index: number) => {
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setValue(`documents.${index}.file_path`, url);
         }
-        setDocuments(updated);
-        onChange(updated);
-    };
-
-    const handleFileChange = (index: number, file: File | null) => {
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        handleFieldChange(index, "file_path", url);
-    };
-
-    const handleAdd = () => {
-        const remainingTypes = DOC_TYPE_OPTIONS.filter(
-            (type) => !documents.some((doc) => doc.doc_type === type)
-        );
-        if (remainingTypes.length === 0) return;
-
-        const newDoc: Document = {
-            doc_type: remainingTypes[0],
-            expiry_date: "",
-            file_path: "",
-        };
-
-        const updated = [...documents, newDoc];
-        setDocuments(updated);
-        onChange(updated);
-    };
-
-    const handleRemove = (index: number) => {
-        const updated = documents.filter((_, i) => i !== index);
-        setDocuments(updated);
-        onChange(updated);
     };
 
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">
                 <h5 className="text-xl font-semibold">Documents</h5>
-                <Button size="xs" onClick={() => setEditMode(!editMode)}>
-                    {editMode ? "Done" : "Edit"}
-                </Button>
+                {!readOnly && (
+                    <Button size="xs" onClick={editMode ? handleSubmit(onSubmit) : () => setEditMode(true)}>
+                        {editMode ? "Save" : "Edit"}
+                    </Button>
+                )}
             </div>
 
-            {documents.map((doc, index) => (
-                <div
-                    key={index}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 border-b pb-4 items-end"
-                >
+            {fields.map((field, index) => (
+                <><div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 pb-4 items-end">
                     <div>
                         <Label>Document Type</Label>
-                        <Select
-                            value={doc.doc_type}
-                            onChange={(e) => handleFieldChange(index, "doc_type", e.target.value)}
-                            disabled={!editMode}
-                        >
+                        <Select {...register(`documents.${index}.doc_type`)} disabled={!editMode}>
                             {DOC_TYPE_OPTIONS.map((type) => (
                                 <option key={type} value={type}>
                                     {type.replace("_", " ").toUpperCase()}
@@ -103,42 +106,59 @@ export const DocumentCard: React.FC<Props> = ({ data, onChange }) => {
 
                     <div>
                         <Label>Expiry Date</Label>
-                        <Datepicker
-                            value={doc.expiry_date ? new Date(doc.expiry_date) : undefined}
-                            onChange={(date) =>
-                                handleFieldChange(index, "expiry_date", date?.toISOString().split("T")[0] || "")
-                            }
-                            disabled={!editMode}
-                        />
+                        <Controller
+                            control={control}
+                            name={`documents.${index}.expiry_date`}
+                            render={({ field }) => (
+                                <Datepicker
+                                    value={field.value ? fromDateString(field.value) : undefined}
+                                    onChange={(date) => field.onChange(date ? toLocalDateString(date) : "")}
+                                    disabled={!editMode} />
+                            )} />
+                        {errors.documents?.[index]?.expiry_date && (
+                            <p className="text-red-500 text-sm">{errors.documents[index]?.expiry_date?.message}</p>
+                        )}
                     </div>
 
                     <div>
-                        <Label>Update Document</Label>
-                        <FileInput
-                            onChange={(e) =>
-                                handleFileChange(index, e.target.files?.[0] || null)
-                            }
-                            disabled={!editMode}
-                        />
+                        <Label>File</Label>
+                        {editMode ? (
+                            <FileInput onChange={(e) => handleFileChange(e.target.files?.[0] || null, index)} />
+                        ) : (
+                            <TextInput disabled value={field.file_path} />
+                        )}
+                        {errors.documents?.[index]?.file_path && (
+                            <p className="text-red-500 text-sm">{errors.documents[index]?.file_path?.message}</p>
+                        )}
                     </div>
 
-                    {editMode && (
+
+                    {editMode && documents.length > 1 && (
                         <div>
-                            <Button
-                                color="failure"
-                                size="xs"
-                                onClick={() => handleRemove(index)}
-                            >
+                            <Button color="failure" size="xs" onClick={() => remove(index)}>
                                 Remove
                             </Button>
                         </div>
                     )}
-                </div>
+                </div>{index < fields.length - 1 && <HR />}</>
             ))}
 
-            {editMode && documents.length < DOC_TYPE_OPTIONS.length && (
+            {errors.documents && typeof errors.documents.message === "string" && (
+                <p className="text-red-500 text-sm mb-2">{errors.documents.message}</p>
+            )}
+
+            {editMode && !readOnly && (
                 <div className="flex justify-start">
-                    <Button onClick={handleAdd} size="sm">
+                    <Button
+                        size="sm"
+                        onClick={() =>
+                            append({
+                                doc_type: "passport",
+                                expiry_date: "",
+                                file_path: "",
+                            })
+                        }
+                    >
                         Add Identification Document
                     </Button>
                 </div>

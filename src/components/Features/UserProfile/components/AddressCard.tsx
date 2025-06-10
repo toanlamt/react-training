@@ -76,7 +76,7 @@ export const AddressCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
       {fields.map((field, index) => (
         <><div
           key={field.id}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pb-4 items-end"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end"
         >
           <div>
             <Label>Country</Label>
@@ -129,12 +129,12 @@ export const AddressCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
             </div>
           )}
         </div>
-        {index < fields.length - 1 && <HR />}</>
+          {index < fields.length - 1 && <HR />}</>
       ))}
 
       {editMode && !readOnly && (
         <div className="flex justify-start">
-            <Button size="sm" onClick={() => append({ country: "", city: "", street: "", postal_code: "", type: "mailing" })}>
+          <Button size="sm" onClick={() => append({ country: "", city: "", street: "", postal_code: "", type: "mailing" })}>
             Add Address
           </Button>
         </div>

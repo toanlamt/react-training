@@ -5,8 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUserProfileStore } from '../../shared/store/userProfileStore.ts';
 import { BasicInfoCard } from '../../components/Features/UserProfile/components/BasicInfoCard.tsx';
 import { AddressCard } from '../../components/Features/UserProfile/components/AddressCard.tsx';
-import { EmailCard } from '../../components/Features/UserProfile/components/EmailCard.tsx';
-import { PhoneCard } from '../../components/Features/UserProfile/components/PhoneCard.tsx';
+import { ContactCard } from '../../components/Features/UserProfile/components/ContactCard.tsx';
 import { DocumentCard } from '../../components/Features/UserProfile/components/DocumentCard.tsx';
 import { EmploymentCard } from '../../components/Features/UserProfile/components/EmploymentCard.tsx';
 
@@ -141,9 +140,9 @@ const ProfileForm = () => {
                     <>
                         <BasicInfoCard data={tempProfile.basicinfo} onChange={(basicinfo) => handlePartialUpdate({ basicinfo })} />
                         <AddressCard data={tempProfile.addresses} onChange={(addresses) => handlePartialUpdate({ addresses })} readOnly={false}/>
-                        <EmailCard data={emails} onChange={(updatedEmails) => handlePartialUpdate({ contacts: [...updatedEmails, ...phones] })} />
-                        <PhoneCard data={phones} onChange={(updatedPhones) => handlePartialUpdate({ contacts: [...emails, ...updatedPhones] })} />
-                        <DocumentCard data={tempProfile.documents} onChange={(docs) => handlePartialUpdate({ documents: docs })} />
+                        <ContactCard data={emails} onChange={(updatedEmails) => console.log({ contacts: [...updatedEmails, ...phones] })} readOnly={false} type={'email'} />
+                        <ContactCard data={phones} onChange={(updatedPhones) => handlePartialUpdate({ contacts: [...emails, ...updatedPhones] })} readOnly={false} type={'phone'} />
+                        <DocumentCard data={tempProfile.documents} onChange={(docs) => handlePartialUpdate({ documents: docs })} readOnly={false}/>
                         <EmploymentCard data={tempProfile.employments} onChange={(emps) => handlePartialUpdate({ employments: emps })} readOnly={false} />
 
                         <div className="text-right">
