@@ -1,5 +1,4 @@
 import { requireAuth } from "../shared/LoginRequire.ts";
-
 import NotFound from "../404.tsx";
 import type { RouteObject } from "react-router";
 import Pages from './Pages.tsx';

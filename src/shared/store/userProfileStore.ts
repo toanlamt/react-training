@@ -4,6 +4,7 @@ import { userProfile } from '../services/userProfile';
 
 interface UserProfileStore extends UserProfileState {
     profile: UserProfile | null,
+    profiles: UserProfile[] | null,
     isLoading: boolean,
     isEditing: boolean,
     error: string | null,
@@ -18,6 +19,7 @@ interface UserProfileStore extends UserProfileState {
 
 export const useUserProfileStore = create<UserProfileStore>((set, get) => ({
     profile: null,
+    profiles: null,
     isLoading: false,
     isEditing: false,
     error: null,
@@ -25,9 +27,9 @@ export const useUserProfileStore = create<UserProfileStore>((set, get) => ({
     fetchUserProfile: async () => {
         set({ isLoading: true, error: null });
         try {
-            const profile = await userProfile.getAllUserProfile();
+            const profiles = await userProfile.getAllUserProfile();
             set({
-                profile: profile,
+                profiles,
                 isLoading: false,
             });
         } catch (error: any) {

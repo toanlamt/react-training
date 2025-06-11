@@ -34,9 +34,13 @@ const Login = () => {
 
     useEffect(() => {
         if (user) {
-            navigate(`/pages/users/${user.id}/details`, { replace: true });
+            if (user.role === "officer") {
+                navigate(`/pages/admin`, { replace: true });
+              } else {
+                navigate(`/pages/users/${user.id}/details`, { replace: true });
+              }
         }
-    }, [user, navigate]);
+    }, [user]);
 
     return (
         <div className="flex flex-col items-center justify-center px-6 pt-8 mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">

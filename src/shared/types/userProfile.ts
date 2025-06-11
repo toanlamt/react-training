@@ -52,6 +52,7 @@ export interface UserProfileFormData extends Omit<UserProfile, 'id'> { }
 
 export interface UserProfileState {
     profile: UserProfile | null;
+    profiles: UserProfile[] | null;
     isLoading: boolean;
     isEditing: boolean;
     error: string | null;

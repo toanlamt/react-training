@@ -4,6 +4,7 @@ import { HiCheck, HiX } from "react-icons/hi";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserProfileStore } from '../../shared/store/userProfileStore.ts';
 import type { UserProfileFormData } from '../../shared/types/userProfile.ts';
+import { useAuthStore } from '../../shared/store/authStore';
 import { BasicInfoCard } from '../../components/Features/UserProfile/components/BasicInfoCard.tsx';
 import { AddressCard } from '../../components/Features/UserProfile/components/AddressCard.tsx';
 import { ContactCard } from '../../components/Features/UserProfile/components/ContactCard.tsx';
@@ -12,6 +13,7 @@ import { EmploymentCard } from '../../components/Features/UserProfile/components
 
 const ProfileForm = () => {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
     const params = useParams();
     const { userId } = useParams<{ userId?: string }>();
     const {
@@ -21,7 +23,9 @@ const ProfileForm = () => {
         fetchUserProfileById,
         updateUserProfile
     } = useUserProfileStore();
+
     const [tempProfile, setTempProfile] = useState<UserProfileFormData | null>(null);
+    const [readOnly, setReadOnly] = useState(false);
     const [toast, setToast] = useState<{
         message: string;
         type: "success" | "error";
@@ -31,6 +35,22 @@ const ProfileForm = () => {
         type: "success",
         visible: false,
     });
+
+    useEffect(() => {
+        if (user?.role === "officer") {
+            setReadOnly(true);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (userId) {
+                await fetchUserProfileById(userId);
+            }
+        };
+
+        fetchData();
+    }, [userId, fetchUserProfileById]);
 
     useEffect(() => {
         if (profile) {
@@ -61,15 +81,6 @@ const ProfileForm = () => {
         setToast({ message, type, visible: true });
         setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
     };
-
-
-    useEffect(() => {
-        // Fetch user profile using userId.
-        if (userId) {
-            fetchUserProfileById(userId);
-        }
-
-    }, [userId, fetchUserProfileById]);
 
     return (
         <div className="grid grid-cols-1 px-4 pt-6 xl:gap-4 dark:bg-gray-900">
@@ -140,8 +151,8 @@ const ProfileForm = () => {
                 {/* Render profile cards useFormif profile exists */}
                 {!isLoading && !error && tempProfile && (
                     <>
-                        <BasicInfoCard data={tempProfile.basicinfo} onChange={(data) => setTempProfile((prev) => prev && { ...prev, basicinfo: data })} readOnly={false} />
-                        <AddressCard data={tempProfile.addresses} onChange={(data) => setTempProfile((prev) => prev && { ...prev, addresses: data })} readOnly={false} />
+                        <BasicInfoCard data={tempProfile.basicinfo} onChange={(data) => setTempProfile((prev) => prev && { ...prev, basicinfo: data })} readOnly={readOnly} />
+                        <AddressCard data={tempProfile.addresses} onChange={(data) => setTempProfile((prev) => prev && { ...prev, addresses: data })} readOnly={readOnly} />
                         <ContactCard data={emails} onChange={(data) =>
                             setTempProfile((prev) =>
                                 prev
@@ -154,7 +165,7 @@ const ProfileForm = () => {
                                     }
                                     : null
                             )
-                        } readOnly={false} type={'email'} />
+                        } readOnly={readOnly} type={'email'} />
                         <ContactCard data={phones} onChange={(data) =>
                             setTempProfile((prev) =>
                                 prev
@@ -167,9 +178,9 @@ const ProfileForm = () => {
                                     }
                                     : null
                             )
-                        } readOnly={false} type={'phone'} />
-                        <DocumentCard data={tempProfile.documents} onChange={(data) => setTempProfile((prev) => prev && { ...prev, documents: data })} readOnly={false} />
-                        <EmploymentCard data={tempProfile.employments} onChange={(data) => setTempProfile((prev) => prev && { ...prev, employments: data })} readOnly={false} />
+                        } readOnly={readOnly} type={'phone'} />
+                        <DocumentCard data={tempProfile.documents} onChange={(data) => setTempProfile((prev) => prev && { ...prev, documents: data })} readOnly={readOnly} />
+                        <EmploymentCard data={tempProfile.employments} onChange={(data) => setTempProfile((prev) => prev && { ...prev, employments: data })} readOnly={readOnly} />
                         {hasChanges && (
                             <div className="text-right">
                                 <button
