@@ -13,12 +13,12 @@ export const userProfile = {
     },
 
     updateUserProfile: async (profileData: UserProfileFormData): Promise<any> => {
-        const response = await apiClient.put('/profile', JSON.stringify(profileData));
+        const response = await apiClient.put('/profile', profileData);
         return response.data;
     },
 
     createUserProfile: async (profileData: UserProfileFormData): Promise<any> => {
-        const response = await apiClient.post('/profile', JSON.stringify(profileData));
+        const response = await apiClient.post('/profile', profileData);
         return response.data;
     }
 };

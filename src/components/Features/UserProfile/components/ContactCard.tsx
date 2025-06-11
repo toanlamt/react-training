@@ -52,10 +52,6 @@ export const ContactCard: React.FC<Props> = ({ data, onChange, readOnly, type })
     name: "contacts",
   });
 
-  useEffect(() => {
-    reset({ contacts: data });
-  }, [data, reset]);
-
   const contacts = watch("contacts");
 
   const onSubmit = (values: { contacts: Contact[] }) => {
@@ -96,7 +92,7 @@ export const ContactCard: React.FC<Props> = ({ data, onChange, readOnly, type })
       </div>
 
       {fields.map((field, index) => (
-        <><div
+        <div
           key={field.id}
           className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end"
         >
@@ -134,15 +130,19 @@ export const ContactCard: React.FC<Props> = ({ data, onChange, readOnly, type })
             </Select>
           </div>
 
-          {editMode && (
+          {editMode && !readOnly && (
             <div>
               <Button color="failure" size="xs" onClick={() => remove(index)}>
                 Remove
               </Button>
             </div>
           )}
+          {index < fields.length - 1 && (
+            <div className="col-span-full">
+              <HR />
+            </div>
+          )}
         </div>
-        {index < fields.length - 1 && <HR />}</>
       ))}
 
 

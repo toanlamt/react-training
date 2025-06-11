@@ -35,7 +35,7 @@ export interface Document {
 export interface Employment {
     company_name: string;
     from_date: string;
-    to_date: string;
+    to_date?: string | null;
 }
 
 export interface UserProfile {

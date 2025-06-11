@@ -33,16 +33,10 @@ export const AddressCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<{ addresses: Address[] }>({
     defaultValues: { addresses: data },
     resolver: yupResolver(addressListSchema),
   });
-
-  useEffect(() => {
-    reset({ addresses: data });
-  }, [data, reset]);
-
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -74,7 +68,7 @@ export const AddressCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
       </div>
 
       {fields.map((field, index) => (
-        <><div
+        <div
           key={field.id}
           className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end"
         >
@@ -121,15 +115,19 @@ export const AddressCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
             </Select>
           </div>
 
-          {editMode && (
+          {editMode && !readOnly && (
             <div className="col-span-2 text-right">
               <Button size="xs" color="failure" onClick={() => remove(index)}>
                 Remove
               </Button>
             </div>
           )}
+          {index < fields.length - 1 && (
+            <div className="col-span-full">
+              <HR />
+            </div>
+          )}
         </div>
-          {index < fields.length - 1 && <HR />}</>
       ))}
 
       {editMode && !readOnly && (

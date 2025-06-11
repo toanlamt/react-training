@@ -48,7 +48,6 @@ export const DocumentCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
         register,
         handleSubmit,
         formState: { errors },
-        reset,
         setValue,
         watch,
     } = useForm<{ documents: Document[] }>({
@@ -62,10 +61,6 @@ export const DocumentCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
     });
 
     const documents = watch("documents");
-
-    useEffect(() => {
-        reset({ documents: data });
-    }, [data, reset]);
 
     const onSubmit = (values: { documents: Document[] }) => {
         const filtered = values.documents.filter((d) => d.doc_type && d.file_path);
@@ -92,7 +87,7 @@ export const DocumentCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
             </div>
 
             {fields.map((field, index) => (
-                <><div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 pb-4 items-end">
+                <div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 pb-4 items-end">
                     <div>
                         <Label>Document Type</Label>
                         <Select {...register(`documents.${index}.doc_type`)} disabled={!editMode}>
@@ -133,19 +128,20 @@ export const DocumentCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
                     </div>
 
 
-                    {editMode && documents.length > 1 && (
+                    {editMode && !readOnly && documents.length > 1 && (
                         <div>
                             <Button color="failure" size="xs" onClick={() => remove(index)}>
                                 Remove
                             </Button>
                         </div>
                     )}
-                </div>{index < fields.length - 1 && <HR />}</>
+                    {index < fields.length - 1 && (
+                        <div className="col-span-full">
+                            <HR />
+                        </div>
+                    )}
+                </div>
             ))}
-
-            {errors.documents && typeof errors.documents.message === "string" && (
-                <p className="text-red-500 text-sm mb-2">{errors.documents.message}</p>
-            )}
 
             {editMode && !readOnly && (
                 <div className="flex justify-start">

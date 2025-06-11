@@ -12,10 +12,10 @@ import { useForm, Controller } from "react-hook-form";
 import type { BasicInfo } from '../../../../shared/types/userProfile';
 import { toLocalDateString, calculateAge } from "../../../../utils/date";
 
-
 type Props = {
     data: BasicInfo;
     onChange: (data: BasicInfo) => void;
+    readOnly?: boolean;
 };
 
 const basicInfoSchema: yup.ObjectSchema<BasicInfo> = yup
@@ -26,21 +26,20 @@ const basicInfoSchema: yup.ObjectSchema<BasicInfo> = yup
         dob: yup
             .string()
             .required("Date of birth is required")
-            .test("is-date", "Invalid date", (v) => !isNaN(Date.parse(v || "")))
+            .test("is-dae", "Invalid date", (v) => !isNaN(Date.parse(v || "")))
             .test("min-age", "You must be at least 18", (v) => calculateAge(v || "") >= 18),
         age: yup.number().required(),
     })
     .required()
     .strict(true);
 
-export const BasicInfoCard: React.FC<Props> = ({ data, onChange }) => {
+export const BasicInfoCard: React.FC<Props> = ({ data, onChange, readOnly = false }) => {
     const [editMode, setEditMode] = useState(false);
 
     const {
         register,
         control,
         handleSubmit,
-        reset,
         watch,
         formState: { errors },
     } = useForm<BasicInfo>({
@@ -57,25 +56,22 @@ export const BasicInfoCard: React.FC<Props> = ({ data, onChange }) => {
         const updatedValues = {
             ...values,
             age: calculateAge(values.dob),
-        }
+        };
         onChange(updatedValues);
         setEditMode(false);
-    };
+    }
 
     const dobValue = watch("dob");
-
-    useEffect(() => {
-        reset(data);
-    }, [data, reset]);
-
 
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">
                 <h5 className="text-xl font-bold">Basic Information</h5>
-                <Button size="xs" onClick={editMode ? handleSubmit(onSubmit) : () => setEditMode(true)}>
-                    {editMode ? "Save" : "Edit"}
-                </Button>
+                {!readOnly && (
+                    <Button size="xs" onClick={editMode ? handleSubmit(onSubmit) : () => setEditMode(true)}>
+                        {editMode ? "Save" : "Edit"}
+                    </Button>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

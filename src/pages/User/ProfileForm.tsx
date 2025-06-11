@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { Spinner, Alert } from 'flowbite-react';
+import { Spinner, Toast } from 'flowbite-react';
+import { HiCheck, HiX } from "react-icons/hi";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserProfileStore } from '../../shared/store/userProfileStore.ts';
+import type { UserProfileFormData } from '../../shared/types/userProfile.ts';
 import { BasicInfoCard } from '../../components/Features/UserProfile/components/BasicInfoCard.tsx';
 import { AddressCard } from '../../components/Features/UserProfile/components/AddressCard.tsx';
 import { ContactCard } from '../../components/Features/UserProfile/components/ContactCard.tsx';
@@ -13,57 +14,54 @@ const ProfileForm = () => {
     const navigate = useNavigate();
     const params = useParams();
     const { userId } = useParams<{ userId?: string }>();
-
     const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<FormData>();
+        profile,
+        isLoading,
+        error,
+        fetchUserProfileById,
+        updateUserProfile
+    } = useUserProfileStore();
+    const [tempProfile, setTempProfile] = useState<UserProfileFormData | null>(null);
+    const [toast, setToast] = useState<{
+        message: string;
+        type: "success" | "error";
+        visible: boolean;
+    }>({
+        message: "",
+        type: "success",
+        visible: false,
+    });
 
-    const onSubmit = (data: FormData) => {
-        console.log('Submitted data:', data);
-    };
+    useEffect(() => {
+        if (profile) {
+            const { id, ...rest } = profile;
+            setTempProfile(rest);
+        }
+    }, [profile]);
 
     const goToKYC = () => {
         navigate(`/pages/users/${params.id}/kyc`);
     }
 
-    const {
-        profile,
-        isLoading,
-        isEditing,
-        error,
-        clearError,
-        fetchUserProfileById,
-        updateUserProfile
-    } = useUserProfileStore();
-
-
-    const [tempProfile, setTempProfile] = useState(profile);
-    useEffect(() => {
-        if (profile) {
-            setTempProfile(profile);
-        }
-    }, [profile]);
-
     const emails = tempProfile?.contacts.filter((c) => c.type === "email") || [];
     const phones = tempProfile?.contacts?.filter((c) => c.type === "phone") || [];
+    const hasChanges =
+        profile && tempProfile &&
+        JSON.stringify(profile) !== JSON.stringify({ id: profile.id, ...tempProfile });
 
-    const handlePartialUpdate = (section: Partial<typeof profile>) => {
-        setTempProfile((prev) => {
-            if (!prev) return null;
-            return {
-                ...prev,
-                ...section,
-            };
-        });
-    };
-
-    const handleSaveAll = () => {
-        if (tempProfile) {
-            updateUserProfile(tempProfile);
+    const handleSaveAll = async () => {
+        if (tempProfile && hasChanges) {
+            await updateUserProfile(tempProfile);
+            showToast("Profile updated successfully!", "success");
         }
+
     };
+
+    const showToast = (message: string, type: "success" | "error") => {
+        setToast({ message, type, visible: true });
+        setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
+    };
+
 
     useEffect(() => {
         // Fetch user profile using userId.
@@ -126,33 +124,62 @@ const ProfileForm = () => {
                     </div>
                 )}
 
-                {/* Show error message */}
-                {error && (
-                    <Alert color="failure">
-                        <span>
-                            <span className="font-medium">Error:</span> {error}
-                        </span>
-                    </Alert>
+                {toast.visible && (
+                    <div className="fixed top-5 right-5 z-50">
+                        <Toast>
+                            {toast.type === "success" ? (
+                                <HiCheck className="h-5 w-5 text-green-500" />
+                            ) : (
+                                <HiX className="h-5 w-5 text-red-500" />
+                            )}
+                            <div className="ml-3 text-sm font-normal">{toast.message}</div>
+                        </Toast>
+                    </div>
                 )}
 
                 {/* Render profile cards useFormif profile exists */}
                 {!isLoading && !error && tempProfile && (
                     <>
-                        <BasicInfoCard data={tempProfile.basicinfo} onChange={(basicinfo) => handlePartialUpdate({ basicinfo })} />
-                        <AddressCard data={tempProfile.addresses} onChange={(addresses) => handlePartialUpdate({ addresses })} readOnly={false}/>
-                        <ContactCard data={emails} onChange={(updatedEmails) => console.log({ contacts: [...updatedEmails, ...phones] })} readOnly={false} type={'email'} />
-                        <ContactCard data={phones} onChange={(updatedPhones) => handlePartialUpdate({ contacts: [...emails, ...updatedPhones] })} readOnly={false} type={'phone'} />
-                        <DocumentCard data={tempProfile.documents} onChange={(docs) => handlePartialUpdate({ documents: docs })} readOnly={false}/>
-                        <EmploymentCard data={tempProfile.employments} onChange={(emps) => handlePartialUpdate({ employments: emps })} readOnly={false} />
-
-                        <div className="text-right">
-                            <button
-                                className="bg-blue-600 text-white px-4 py-2 rounded"
-                                onClick={handleSaveAll}
-                            >
-                                Save All
-                            </button>
-                        </div>
+                        <BasicInfoCard data={tempProfile.basicinfo} onChange={(data) => setTempProfile((prev) => prev && { ...prev, basicinfo: data })} readOnly={false} />
+                        <AddressCard data={tempProfile.addresses} onChange={(data) => setTempProfile((prev) => prev && { ...prev, addresses: data })} readOnly={false} />
+                        <ContactCard data={emails} onChange={(data) =>
+                            setTempProfile((prev) =>
+                                prev
+                                    ? {
+                                        ...prev,
+                                        contacts: [
+                                            ...data,
+                                            ...prev.contacts.filter((c) => c.type !== "email"),
+                                        ],
+                                    }
+                                    : null
+                            )
+                        } readOnly={false} type={'email'} />
+                        <ContactCard data={phones} onChange={(data) =>
+                            setTempProfile((prev) =>
+                                prev
+                                    ? {
+                                        ...prev,
+                                        contacts: [
+                                            ...prev.contacts.filter((c) => c.type !== "phone"),
+                                            ...data,
+                                        ],
+                                    }
+                                    : null
+                            )
+                        } readOnly={false} type={'phone'} />
+                        <DocumentCard data={tempProfile.documents} onChange={(data) => setTempProfile((prev) => prev && { ...prev, documents: data })} readOnly={false} />
+                        <EmploymentCard data={tempProfile.employments} onChange={(data) => setTempProfile((prev) => prev && { ...prev, employments: data })} readOnly={false} />
+                        {hasChanges && (
+                            <div className="text-right">
+                                <button
+                                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                                    onClick={handleSaveAll}
+                                >
+                                    Save All
+                                </button>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
