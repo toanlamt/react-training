@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Spinner, Toast } from 'flowbite-react';
-import { HiCheck, HiX } from "react-icons/hi";
+import { Spinner, Toast, Button } from 'flowbite-react';
+import { HiCheck, HiX, HiOutlineArrowRight } from "react-icons/hi";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserProfileStore } from '../../shared/store/userProfileStore.ts';
 import type { UserProfileFormData } from '../../shared/types/userProfile.ts';
@@ -14,7 +14,6 @@ import { EmploymentCard } from '../../components/Features/UserProfile/components
 const ProfileForm = () => {
     const navigate = useNavigate();
     const { user } = useAuthStore();
-    const params = useParams();
     const { userId } = useParams<{ userId?: string }>();
     const {
         profile,
@@ -60,7 +59,7 @@ const ProfileForm = () => {
     }, [profile]);
 
     const goToKYC = () => {
-        navigate(`/pages/users/${params.id}/kyc`);
+        navigate(`/pages/users/${userId}/kyc`);
     }
 
     const emails = tempProfile?.contacts.filter((c) => c.type === "email") || [];
@@ -71,16 +70,32 @@ const ProfileForm = () => {
 
     const handleSaveAll = async () => {
         if (tempProfile && hasChanges) {
-            await updateUserProfile(tempProfile);
-            showToast("Profile updated successfully!", "success");
+            const result = await updateUserProfile(tempProfile);
+            if (result) {
+                showToast("Profile updated successfully!", "success");
+            }
         }
-
     };
 
     const showToast = (message: string, type: "success" | "error") => {
         setToast({ message, type, visible: true });
         setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
     };
+
+    useEffect(() => {
+        if (error) {
+            if (typeof error === "string") {
+                showToast(error, "error");
+            }
+            else if (Array.isArray(error)) {
+                const errorMessages = error.map((err: any) => err.msg).join(", ");
+                showToast(errorMessages, "error");
+            }
+            else {
+                showToast("An unexpected error occurred.", "error");
+            }
+        }
+    }, [error]);
 
     return (
         <div className="grid grid-cols-1 px-4 pt-6 xl:gap-4 dark:bg-gray-900">
@@ -124,8 +139,15 @@ const ProfileForm = () => {
                         </li>
                     </ol>
                 </nav>
-                <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Personal
-                    Information</h1>
+                <div className="mb-4 col-span-full xl:mb-2 flex justify-between items-center">
+                    <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
+                        Personal Information
+                    </h1>
+                    <Button className="bg-orange-500 hover:bg-orange-600 text-white" pill onClick={goToKYC}>
+                        KYC
+                        <HiOutlineArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </div>
             </div>
             <div className="space-y-6">
                 {/* Show loading spinner */}

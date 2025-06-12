@@ -32,6 +32,7 @@ export const AddressCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
     control,
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<{ addresses: Address[] }>({
     defaultValues: { addresses: data },
@@ -51,10 +52,17 @@ export const AddressCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
         addr.street.trim() ||
         addr.postal_code.trim()
     );
-    console.log(cleaned);
+
     onChange(cleaned);
     setEditMode(false);
   };
+
+  useEffect(() => {
+    if (data) {
+      reset({ addresses: data });
+    }
+
+  }, [data, reset]);
 
   return (
     <Card>

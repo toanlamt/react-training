@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuthStore } from '../../shared/store/authStore';
 import type { SignUpCredentials, Role } from '../../shared/types/auth';
+import { Datepicker } from "flowbite-react";
+import { calculateAge } from "../../utils/date";
 
 const roles: Role[] = ['user', 'officer'];
 
@@ -24,32 +26,71 @@ const signUpSchema = yup.object({
             /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[@#&!])/,
             'Password must contain letters, numbers and special characters (@#&!)'
         ),
-    role: yup.string()
-        .oneOf(roles, 'Invalid role selected')
-        .default('officer'),
     confirmPassword: yup.string()
         .required('Confirm password is required')
         .oneOf([yup.ref('password')], 'Passwords must match'),
+    role: yup.string()
+        .oneOf(roles, 'Invalid role selected')
+        .default('user'),
     terms: yup.boolean()
         .oneOf([true], 'You must accept the Terms and Conditions')
         .default(false),
+    dob: yup
+        .string()
+        .required("Date of birth is required")
+        .test("is-date", "Invalid date", (v) => !isNaN(Date.parse(v || "")))
+        .test("age-min", "You must be at least 18", (v) => {
+            if (!v) return false;
+            const dob = new Date(v);
+            const age = new Date().getFullYear() - dob.getFullYear();
+            return age >= 18;
+        }),
+    first_name: yup.string().required("First name is required"),
+    middle_name: yup.string().optional().default(''),
+    last_name: yup.string().required("Last name is required"),
 });
 
 const SignUp = () => {
     const navigate = useNavigate()
-    const { signUp, isLoading, error, clearError } = useAuthStore();
+    const { signUp, error, clearError } = useAuthStore();
     const {
         register,
         handleSubmit,
-        formState: { errors }
+        formState: { errors },
+        control
     } = useForm<SignUpCredentials>({
-        resolver: yupResolver(signUpSchema)
+        resolver: yupResolver(signUpSchema),
+        defaultValues: {
+            username: '',
+            password: '',
+            confirmPassword: '',
+            role: 'user',
+            terms: false,
+            dob: '',
+            first_name: '',
+            middle_name: '',
+            last_name: '',
+        },
     });
     const onSubmit = async (data: SignUpCredentials) => {
         try {
             clearError();
-            await signUp(data);
-            navigate('/auth/login', { replace: true });
+            const payload = {
+                user_data: {
+                    username: data.username,
+                    role: data.role,
+                    password: data.password,
+                },
+                profile_data: {
+                    first_name: data.first_name,
+                    middle_name: data.middle_name || "",
+                    last_name: data.last_name,
+                    dob: data.dob,
+                    age: calculateAge(data.dob).toString(),
+                },
+            };
+            const user = await signUp(payload);
+            navigate(`/pages/users/${user.user_id}/details`, { replace: true });
         } catch (error) {
             console.error('Login failed:', error);
         }
@@ -92,6 +133,41 @@ const SignUp = () => {
                         {errors.confirmPassword && (
                             <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
                         )}
+                    </div>
+                    <div>
+                        <label htmlFor="first_name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First Name</label>
+                        <input type="text" {...register("first_name")} className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                        {errors.first_name && <p className="text-sm text-red-600">{errors.first_name.message}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="middle_name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Middle Name</label>
+                        <input type="text" {...register("middle_name")} className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                    </div>
+
+                    <div>
+                        <label htmlFor="last_name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last Name</label>
+                        <input type="text" {...register("last_name")} className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                        {errors.last_name && <p className="text-sm text-red-600">{errors.last_name.message}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="dob" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Date of Birth
+                        </label>
+                        <Controller
+                            name="dob"
+                            control={control}
+                            render={({ field }) => (
+                                <Datepicker
+                                    value={field.value ? new Date(field.value) : null}
+                                    onChange={(date) => field.onChange(date ? date.toISOString().split("T")[0] : "")}
+                                    placeholder="Select your date of birth"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                />
+                            )}
+                        />
+                        {errors.dob && <p className="text-sm text-red-600">{errors.dob.message}</p>}
                     </div>
                     <div>
                         <label htmlFor="role" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select user role</label>

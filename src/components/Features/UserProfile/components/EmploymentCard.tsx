@@ -43,6 +43,7 @@ export const EmploymentCard: React.FC<Props> = ({ data, onChange, readOnly = fal
         control,
         register,
         handleSubmit,
+        reset,
         formState: { errors },
     } = useForm<{ employments: Employment[] }>({
         defaultValues: { employments: data },
@@ -60,6 +61,12 @@ export const EmploymentCard: React.FC<Props> = ({ data, onChange, readOnly = fal
         setEditMode(false);
     };
 
+    useEffect(() => {
+        if (data) {
+            reset({ employments: data });
+        }
+    }, [data, reset]);
+
     return (
         <Card>
             <div className="flex justify-between items-center mb-4">
@@ -74,7 +81,7 @@ export const EmploymentCard: React.FC<Props> = ({ data, onChange, readOnly = fal
             {fields.map((field, index) => (
                 <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <div>
-                        <Label>Company Name</Label>
+                        <Label>Occupation</Label>
                         <TextInput {...register(`employments.${index}.company_name`)} disabled={!editMode} />
                         {errors.employments?.[index]?.company_name && (
                             <p className="text-red-500 text-sm">{errors.employments[index]?.company_name?.message}</p>

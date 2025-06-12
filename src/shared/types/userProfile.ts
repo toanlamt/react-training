@@ -5,7 +5,7 @@ export type DocType = 'passport' | 'id_card' | 'driver_license';
 
 export interface BasicInfo {
     first_name: string;
-    middle_name?: string;
+    middle_name: string;
     last_name: string;
     dob: string;
     age: number;
@@ -55,7 +55,7 @@ export interface UserProfileState {
     profiles: UserProfile[] | null;
     isLoading: boolean;
     isEditing: boolean;
-    error: string | null;
+    error: string | null | [];
 }
 
 

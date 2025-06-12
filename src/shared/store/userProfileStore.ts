@@ -7,11 +7,11 @@ interface UserProfileStore extends UserProfileState {
     profiles: UserProfile[] | null,
     isLoading: boolean,
     isEditing: boolean,
-    error: string | null,
+    error: string | null | [],
 
     fetchUserProfile: () => Promise<void>;
     fetchUserProfileById: (userId: string) => Promise<void>;
-    updateUserProfile: (profileData: UserProfileFormData) => Promise<void>;
+    updateUserProfile: (profileData: UserProfileFormData) => Promise<any>;
     createUserProfile: (profileData: UserProfileFormData) => Promise<void>;
     setEditMode: (isEditing: boolean) => void;
     clearError: () => void;
@@ -62,11 +62,14 @@ export const useUserProfileStore = create<UserProfileStore>((set, get) => ({
 
         try {
             const profile = await userProfile.updateUserProfile(profileData);
-            set({
-                profile: profile,
-                isLoading: false,
-                isEditing: false,
-            });
+            if (profile) {
+                set({
+                    profile: profile,
+                    isLoading: false,
+                    isEditing: false,
+                });
+            }
+            return profile;
         } catch (error: any) {
             set({
                 error: error.response?.data?.detail || 'Failed to update profile',

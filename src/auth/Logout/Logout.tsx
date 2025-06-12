@@ -8,8 +8,6 @@ const Logout = () => {
     const { logout } = useAuthStore();
     const navigate = useNavigate();
 
-    console.log(location)
-
     const handleLogout = async () => {
         try {
             await logout();

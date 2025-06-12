@@ -8,9 +8,9 @@ const RootLayout: React.FC = () => {
         <>
             <AppHeader/>
             <div className="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
-                <AppSidebar/>
+                {/* <AppSidebar/> */}
                 <div id="main-content"
-                     className="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
+                     className="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-15 lg:mr-15 dark:bg-gray-900">
                     <main>
                         <Outlet></Outlet>
                         <AppFooter/>

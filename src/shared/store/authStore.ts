@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { User, LoginCredentials, SignUpCredentials } from '../types/auth';
+import type { User, LoginCredentials, SignUpPayload } from '../types/auth';
 import { authService } from '../services/authService';
 
 interface AuthState {
@@ -9,7 +9,7 @@ interface AuthState {
   error: string | null;
 
   login: (credentials: LoginCredentials) => Promise<void>;
-  signUp: (credentials: SignUpCredentials) => Promise<void>;
+  signUp: (credentials: SignUpPayload) => Promise<any>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   clearError: () => void;
@@ -41,11 +41,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  signUp: async (credentials: SignUpCredentials) => {
+  signUp: async (credentials: SignUpPayload) => {
     set({ isLoading: true, error: null });
     try {
-      await authService.signUp(credentials);
+      const result = await authService.signUp(credentials);
       set({ isAuthenticated: false, isLoading: false });
+      return result;
     } catch (error: any) {
       const errorDetail = Array.isArray(error.response?.data?.detail)
         ? error.response.data.detail.map((item: any) => item.msg).join('<br />')

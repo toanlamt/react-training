@@ -50,6 +50,7 @@ export const DocumentCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
         formState: { errors },
         setValue,
         watch,
+        reset,
     } = useForm<{ documents: Document[] }>({
         defaultValues: { documents: data },
         resolver: yupResolver(documentListSchema),
@@ -74,6 +75,12 @@ export const DocumentCard: React.FC<Props> = ({ data, onChange, readOnly }) => {
             setValue(`documents.${index}.file_path`, url);
         }
     };
+
+    useEffect(() => {
+        if (data) {
+            reset({ documents: data });
+        }
+    }, [data, reset]);
 
     return (
         <Card>

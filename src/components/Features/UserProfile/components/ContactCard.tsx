@@ -80,6 +80,12 @@ export const ContactCard: React.FC<Props> = ({ data, onChange, readOnly, type })
     reset({ contacts: updated });
   };
 
+  useEffect(() => {
+    if (data) {
+      reset({ contacts: data });
+    }
+  }, [data, reset]);
+
   return (
     <Card>
       <div className="flex justify-between items-center mb-4">

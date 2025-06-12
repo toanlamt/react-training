@@ -18,10 +18,9 @@ type Props = {
     readOnly?: boolean;
 };
 
-const basicInfoSchema: yup.ObjectSchema<BasicInfo> = yup
-    .object({
+const basicInfoSchema = yup.object({
         first_name: yup.string().required("First name is required"),
-        middle_name: yup.string().optional(),
+        middle_name: yup.string().optional().default(''),
         last_name: yup.string().required("Last name is required"),
         dob: yup
             .string()
@@ -29,9 +28,7 @@ const basicInfoSchema: yup.ObjectSchema<BasicInfo> = yup
             .test("is-dae", "Invalid date", (v) => !isNaN(Date.parse(v || "")))
             .test("min-age", "You must be at least 18", (v) => calculateAge(v || "") >= 18),
         age: yup.number().required(),
-    })
-    .required()
-    .strict(true);
+    });
 
 export const BasicInfoCard: React.FC<Props> = ({ data, onChange, readOnly = false }) => {
     const [editMode, setEditMode] = useState(false);
@@ -41,11 +38,12 @@ export const BasicInfoCard: React.FC<Props> = ({ data, onChange, readOnly = fals
         control,
         handleSubmit,
         watch,
+        reset,
         formState: { errors },
     } = useForm<BasicInfo>({
         defaultValues: {
             ...data,
-            middle_name: data.middle_name ?? "",
+            middle_name: '',
             age: calculateAge(data.dob),
         },
         resolver: yupResolver(basicInfoSchema),
@@ -62,6 +60,16 @@ export const BasicInfoCard: React.FC<Props> = ({ data, onChange, readOnly = fals
     }
 
     const dobValue = watch("dob");
+
+    useEffect(() => {
+        if (data) {
+            reset({
+                ...data,
+                middle_name: data.middle_name ?? "",
+                age: calculateAge(data.dob),
+            });
+        }
+    }, [data, reset]);
 
     return (
         <Card>
