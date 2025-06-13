@@ -12,11 +12,13 @@ const ClientProfileList: React.FC<Props> = ({ profiles }) => {
     <div className="overflow-x-auto">
       <Table hoverable striped>
         <TableHead>
-          <TableHeadCell>First Name</TableHeadCell>
-          <TableHeadCell>Middle Name</TableHeadCell>
-          <TableHeadCell>Last Name</TableHeadCell>
-          <TableHeadCell>Age</TableHeadCell>
-          <TableHeadCell>Action</TableHeadCell>
+          <TableRow>
+            <TableHeadCell>First Name</TableHeadCell>
+            <TableHeadCell>Middle Name</TableHeadCell>
+            <TableHeadCell>Last Name</TableHeadCell>
+            <TableHeadCell>Age</TableHeadCell>
+            <TableHeadCell>Action</TableHeadCell>
+          </TableRow>
         </TableHead>
         <TableBody className="divide-y">
           {profiles.map((profile) => (

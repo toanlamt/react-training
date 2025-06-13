@@ -18,12 +18,17 @@ export async function requireAuth(request: Request): Promise<Response | null> {
 }
 
 export async function requireOfficer(request: Request): Promise<Response | null> {
-    const { user } = useAuthStore.getState();
+    const { isAuthenticated, checkAuth } = useAuthStore.getState();
 
-    // If not authenticated, call checkAuth to verify authentication
-    if (!user || user.role !== 'officer') {
-        const url = new URL(request.url);
-        return Response.redirect(`/auth/login?redirectTo=${url.pathname}`, 302);
+    if (!isAuthenticated) {
+        await checkAuth();
+
+        const user = useAuthStore.getState().user;
+        const authState = useAuthStore.getState().user;
+        if (!authState || !user || user.role !== 'officer') {
+            const url = new URL(request.url);
+            return Response.redirect(`/auth/login?redirectTo=${url.pathname}`, 302);
+        }
     }
 
     return null;

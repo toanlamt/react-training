@@ -2,6 +2,7 @@ export type Incomes = "salary" | "investment" | "others";
 export type Assets = "bond" | "liquidity" | "real_estate" | "others";
 export type Liabilities = "personal_loan" | "real_estate_loan" | "others";
 export type WealthSources = "inheritance" | "donation";
+export type KYCStatus = "pending" | "approved" | "rejected";
 
 export const FinancialTypes = {
   incomes: [
@@ -64,8 +65,11 @@ export interface sourceType {
 }
 
 export interface KYC {
+  first_name: string;
   id: number;
   user_id: number;
+  status: KYCStatus;
+  status_updated_at: string;
   market_experience: string | null;
   risk_tolerance: string | null;
   incomes: incomeType[] | [];
@@ -89,4 +93,6 @@ export interface KYCState {
   kyc: KYC | null;
   isLoading: boolean;
   error: string | null | [];
+  pendingKYCList: KYC[];
+  resultKYCList: KYC[];
 }

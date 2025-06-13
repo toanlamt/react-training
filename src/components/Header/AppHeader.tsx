@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../shared/store/authStore';
 import { Dropdown, DropdownDivider, DropdownHeader, DropdownItem, Avatar } from "flowbite-react";
-import { HiCog, HiCurrencyDollar, HiLogout, HiViewGrid, HiUserAdd } from "react-icons/hi";
+import { HiClipboardCheck, HiClipboardList, HiLogout, HiUserAdd } from "react-icons/hi";
 import { useNavigate } from 'react-router-dom';
 
 const AppHeader = () => {
@@ -430,16 +430,28 @@ const AppHeader = () => {
                                         <DropdownHeader>
                                             <span className="block text-sm">{user ? user.username : ''}</span>
                                         </DropdownHeader>
-                                        <DropdownItem icon={HiViewGrid}>Dashboard</DropdownItem>
-                                        <DropdownItem icon={HiCog}>Settings</DropdownItem>
-                                        <DropdownItem icon={HiCurrencyDollar}>Earnings</DropdownItem>
+                                
                                         {user?.role === 'officer' && (
-                                            <DropdownItem
-                                                icon={HiUserAdd}
-                                                onClick={() => navigate('/auth/sign-up')}
-                                            >
-                                                Add profile
-                                            </DropdownItem>
+                                            <>
+                                                <DropdownItem
+                                                    icon={HiClipboardCheck}
+                                                    onClick={() => navigate('/pages/admin/result')}
+                                                    >
+                                                    Result
+                                                </DropdownItem>
+                                                <DropdownItem
+                                                    icon={HiClipboardList}
+                                                    onClick={() => navigate('/pages/admin/preview')}
+                                                    >
+                                                    Preview
+                                                </DropdownItem>
+                                                <DropdownItem
+                                                    icon={HiUserAdd}
+                                                    onClick={() => navigate('/auth/sign-up')}
+                                                >
+                                                    Add profile
+                                                </DropdownItem>
+                                            </>
                                         )}
                                         <DropdownDivider />
                                         <DropdownItem icon={HiLogout} onClick={handleSignOut}>Sign out</DropdownItem>

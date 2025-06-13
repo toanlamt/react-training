@@ -35,7 +35,7 @@ const Login = () => {
     useEffect(() => {
         if (user) {
             if (user.role === "officer") {
-                navigate(`/pages/admin`, { replace: true });
+                navigate(`/pages/admin/profiles`, { replace: true });
               } else {
                 navigate(`/pages/users/${user.id}/details`, { replace: true });
               }
