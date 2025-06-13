@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../shared/store/authStore';
 import { Dropdown, DropdownDivider, DropdownHeader, DropdownItem, Avatar } from "flowbite-react";
-import { HiClipboardCheck, HiClipboardList, HiLogout, HiUserAdd } from "react-icons/hi";
+import { HiClipboardCheck, HiClipboardList, HiLogout, HiUserAdd, HiOutlineViewBoards } from "react-icons/hi";
 import { useNavigate } from 'react-router-dom';
 
 const AppHeader = () => {
@@ -428,11 +428,17 @@ const AppHeader = () => {
                                         }
                                     >
                                         <DropdownHeader>
-                                            <span className="block text-sm">{user ? user.username : ''}</span>
+                                            <span className="block text-sm">{user ? `Welcome, ${user.username}` : ''}</span>
                                         </DropdownHeader>
                                 
                                         {user?.role === 'officer' && (
                                             <>
+                                                <DropdownItem
+                                                    icon={HiOutlineViewBoards}
+                                                    onClick={() => navigate('/pages/admin/profiles')}
+                                                    >
+                                                    Profiles
+                                                </DropdownItem>
                                                 <DropdownItem
                                                     icon={HiClipboardCheck}
                                                     onClick={() => navigate('/pages/admin/result')}

@@ -71,6 +71,7 @@ export interface KYC {
   status: KYCStatus;
   status_updated_at: string;
   market_experience: string | null;
+  profile: [];
   risk_tolerance: string | null;
   incomes: incomeType[] | [];
   assets: assetType[] | [];

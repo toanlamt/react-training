@@ -5,12 +5,14 @@ import { userProfile } from '../services/userProfile';
 interface UserProfileStore extends UserProfileState {
     profile: UserProfile | null,
     profiles: UserProfile[] | null,
+    profileBasic: null,
     isLoading: boolean,
     isEditing: boolean,
     error: string | null | [],
 
     fetchUserProfile: () => Promise<void>;
     fetchUserProfileById: (userId: string) => Promise<void>;
+    fetchUserProfileBasicById: (userId: string) => Promise<void>;
     updateUserProfile: (profileData: UserProfileFormData) => Promise<any>;
     createUserProfile: (profileData: UserProfileFormData) => Promise<void>;
     setEditMode: (isEditing: boolean) => void;
@@ -20,6 +22,7 @@ interface UserProfileStore extends UserProfileState {
 export const useUserProfileStore = create<UserProfileStore>((set, get) => ({
     profile: null,
     profiles: null,
+    profileBasic: null,
     isLoading: false,
     isEditing: false,
     error: null,
@@ -47,6 +50,23 @@ export const useUserProfileStore = create<UserProfileStore>((set, get) => ({
             const profile = await userProfile.getUserProfileById(userId);
             set({
                 profile: profile,
+                isLoading: false,
+            });
+        } catch (error: any) {
+            set({
+                error: error.response?.data?.detail || 'Failed to fetch profile',
+                isLoading: false,
+            });
+        }
+    },
+
+    fetchUserProfileBasicById: async (userId: string) => {
+        set({ isLoading: true, error: null });
+
+        try {
+            const profile = await userProfile.getUserProfileBasicById(userId);
+            set({
+                profileBasic: profile,
                 isLoading: false,
             });
         } catch (error: any) {

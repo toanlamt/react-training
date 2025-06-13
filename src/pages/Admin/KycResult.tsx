@@ -4,6 +4,7 @@ import NotFound from '../../404.tsx';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useKYCStore } from '../../shared/store/kycStore';
+import {getFullName} from '../../utils/getFullName.ts';
 
 const statusColor = {
     approved: "success",
@@ -98,7 +99,7 @@ export const KYCResultPage = () => {
                       className="text-blue-600 cursor-pointer hover:underline"
                       onClick={() => navigate(`/pages/users/${kyc.user_id}/details`)}
                     >
-                      {kyc.first_name || "Unknown"}
+                      {getFullName(kyc.profile) || "Unknown"}
                     </TableCell>
                     <TableCell>
                       <div className="inline-block">

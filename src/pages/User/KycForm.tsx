@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Spinner, Toast, Button } from 'flowbite-react';
+import { Spinner, Toast, Button, Badge } from 'flowbite-react';
 import { HiCheck, HiX, HiOutlineArrowLeft } from "react-icons/hi";
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, FormProvider } from "react-hook-form";;
@@ -10,7 +10,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { NetWorthSection } from '../../components/Features/kyc/components/NetWorthSection.tsx';
 import { FinancialStatusSection, financialStatusSchema } from '../../components/Features/kyc/components/FinancialStatusSection.tsx';
 import { InvestmentExperienceSection, investmentExperienceSchema } from '../../components/Features/kyc/components/InvestmentExperienceSection.tsx';
-import type { KYCFormData } from '../../shared/types/kyc.ts';
+import type { KYCFormData, KYCStatus } from '../../shared/types/kyc.ts';
 
 const kycSchema = yup.object({
     ...financialStatusSchema.fields,
@@ -68,6 +68,8 @@ const KycForm = () => {
         fetchData();
     }, [userId, fetchKYCByUserId]);
 
+    console.log(kyc)
+
     useEffect(() => {
         if (kyc) {
             reset({
@@ -80,6 +82,10 @@ const KycForm = () => {
                 market_experience: kyc.market_experience || null,
                 risk_tolerance: kyc.risk_tolerance || null,
             });
+
+            if (kyc.status == "approved" as KYCStatus) {
+                setReadOnly(true);
+            }
         }
     }, [kyc, reset]);
 
@@ -184,14 +190,21 @@ const KycForm = () => {
 
             {!isLoading && !error && kyc && (
 
-                <>{!readOnly && (
-                    <div className="flex justify-between items-center mb-4">
-                        <Button size="xs" onClick={() => setEditMode(!editMode)}>
-                            {editMode ? "Save" : "Edit"}
-                        </Button>
-                    </div>
+                <>
+                    {kyc.status === "approved" as KYCStatus && (
+                        <div className="mb-4 flex justify-left">
+                            <Badge color="success" size="sm">Approved</Badge>
+                        </div>
+                    )}
 
-                )}
+                    {!readOnly && (
+                        <div className="flex justify-between items-center mb-4">
+                            <Button size="xs" onClick={() => setEditMode(!editMode)}>
+                                {editMode ? "Save" : "Edit"}
+                            </Button>
+                        </div>
+
+                    )}
 
                     <FormProvider {...form}>
                         <form onSubmit={handleSubmit(onSubmit)} >

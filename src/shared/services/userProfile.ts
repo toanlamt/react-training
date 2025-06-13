@@ -20,6 +20,15 @@ export const userProfile = {
         }
     },
 
+    getUserProfileBasicById: async (userId: string): Promise<any> => {
+        try {
+            const response = await apiClient.get(`/profile/basic/${userId}`);
+            return response.data;
+        } catch (error: any) {
+            throw error || new Error('Failed to fetch user profile');
+        }
+    },
+
     updateUserProfile: async (profileData: UserProfileFormData): Promise<any> => {
         try {
             const response = await apiClient.put('/profile', profileData);

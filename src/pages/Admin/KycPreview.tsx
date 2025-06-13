@@ -4,6 +4,7 @@ import NotFound from '../../404.tsx';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useKYCStore } from '../../shared/store/kycStore';
+import {getFullName} from '../../utils/getFullName.ts';
 
 export const KYCReviewPage = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export const KYCReviewPage = () => {
       currentPage * itemsPerPage
     )
     : [];
+
 
   useEffect(() => {
     fetchPendingKYC();
@@ -93,7 +95,7 @@ export const KYCReviewPage = () => {
                       className="text-blue-600 cursor-pointer hover:underline"
                       onClick={() => navigate(`/users/${kyc.user_id}/details`)}
                     >
-                      {kyc.first_name || "Unknown"}
+                      {getFullName(kyc.profile) || "Unknown"}
                     </TableCell>
                     <TableCell>
                       <div className="inline-block">
